@@ -214,15 +214,35 @@ const e0Slider   = document.getElementById("e0Slider");
 const eavgSlider = document.getElementById("eavgSlider");
 const transparencyToggle = document.getElementById("transparencyToggle");
 
+// Los <span> que muestran el valor
+const n2Val   = document.getElementById("n2Val");
+const e0Val   = document.getElementById("e0Val");
+const eavgVal = document.getElementById("eavgVal");
+
+// Inicializa los span con el valor actual de los sliders
+n2Val.textContent   = Number(n2Slider.value).toFixed(2);
+e0Val.textContent   = Number(e0Slider.value).toFixed(0);
+eavgVal.textContent = Number(eavgSlider.value).toFixed(0);
+
+// Listeners: actualizan uniform y número visible
 n2Slider.addEventListener("input", () => {
-  material.uniforms.n2.value = Number(n2Slider.value);
+  const v = Number(n2Slider.value);
+  material.uniforms.n2.value = v;      
+  n2Val.textContent = v.toFixed(2);       
 });
+
 e0Slider.addEventListener("input", () => {
-  material.uniforms.e0_nm = { value: Number(e0Slider.value)};
+  const v = Number(e0Slider.value);
+  material.uniforms.e0_nm.value = v;    
+  e0Val.textContent = v.toFixed(0);   
 });
+
 eavgSlider.addEventListener("input", () => {
-  material.uniforms.eavg_nm = { value: Number(eavgSlider.value)};
+  const v = Number(eavgSlider.value);
+  material.uniforms.eavg_nm.value = v;  
+  eavgVal.textContent = v.toFixed(0);   
 });
+
 transparencyToggle.addEventListener("change", () => {
   material.uniforms.showTransmission.value = transparencyToggle.checked;
 });

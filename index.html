@@ -20,16 +20,17 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <h1>Simulador de la pompa iridiscente</h1>
+    <h1>Simulador de la iridiscencia de una pompa</h1>
 
     <p>
-    Simulación física de la interferencia en películas delgadas.
-    El color depende del espesor de la película y del ángulo
-    de observación.
+    <br>Simulación física de la interferencia en una pompa.</br>
+    Debido a que tienen un espesor del orden de los nanómetros, se generan
+    interferencias en el visible. Esto da lugar al fenómeno de la iridiscencia
+    que, junto con otros parámetros de la pompa, crean el arcoíris que vemos en su superficie.
     </p>
 
     <div id="camUI" style="left:8px; top:28px; color:#ccc; font:12px/1.2 monospace; background:#141821; padding:8px; border-radius:6px;">
-      <div><b>Vista (cámara)</b></div>
+      <div><b>Perspectiva de la cámara</b></div>
       <label>Elevación: <span id="thetaVal">0</span>°</label><br/>
       <input id="thetaSlider" type="range" min="-89" max="89" step="1" value="0" style="width:220px"/>
       <div></div>
@@ -40,28 +41,26 @@
     <div id="physUI" style="left:8px; top:170px; color:#ccc; font:12px monospace; background:#141821; padding:8px; border-radius:6px;">
       <div><b>Parámetros físicos</b></div>
 
-      <label>Índice de refracción de la pompa</label><br>
+      <label>Índice de refracción: <span id="n2Val">1.33</span></label><br>
       <input id="n2Slider" type="range" min="1.00" max="2.00" step="0.001" value="1.33" style="width:220px"><br>
 
-      <label>Espesor en la parte superior</label><br>
+      <label>Espesor en la parte superior: <span id="e0Val">50</span>nm</label><br>
       <input id="e0Slider" type="range" min="10" max="400" step="5" value="50" style="width:220px"><br>
 
-      <label>Espesor promedio</label><br>
+      <label>Espesor promedio: <span id="eavgVal">1500</span>nm</label><br>
       <input id="eavgSlider" type="range" min="200" max="2000" step="20" value="1500" style="width:220px"><br>
 
-      <label>
-      <input id="transparencyToggle" type="checkbox" checked>
-      Reflectancia
-      </label>
+      <label>Reflectancia: <input id="transparencyToggle" type="checkbox" style="width:10px" checked> </label>
     </div>
 
     <div id="simContainer"></div>
     <section id="confirmacion">
 
-    <h2>Confirmar tu modelo</h2>
+    <h2>Confirma y házte con tu modelo</h2>
     <p>
-    Cuando encuentres una configuración que te guste,
-    puedes generar un certificado de tu pompa.
+    Cuando encuentres una perspectiva y una configuración que te guste,
+    puedes llevarte un recuerdo de tu pompa personalizada en forma de certificado.
+    Ponle nombre a tu pompa, escribe tu nombre y podrás descargar tu certificado personal.
     </p>
     </section>
 
