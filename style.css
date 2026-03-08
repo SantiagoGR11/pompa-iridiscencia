@@ -57,8 +57,7 @@ input[type="range"]{
 
 #simContainer{
 
- width:100%;
- max-width: 400px;
+ width:400px;
  height:380px;
 
  border-radius:16px;
@@ -149,7 +148,7 @@ section{
 
 /* Frase debajo del título (subtítulo) */
 .cert-subtitle {
-  font-size: clamp(28px, 1.5vw, 28px);  /* más grande */
+  font-size: clamp(20px, 1.5vw, 20px);  /* más grande */
   font-weight: 500;
   line-height: 1.35;
 }
