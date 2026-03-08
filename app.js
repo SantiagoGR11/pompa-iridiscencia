@@ -66,7 +66,7 @@ rollSlider.addEventListener('input', () => {
 // Colocar cámara al iniciar
 setCameraFromSpherical();
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(container.clientWidth,container.clientHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.NoToneMapping;
@@ -75,6 +75,25 @@ document.getElementById("simContainer").appendChild(renderer.domElement);
 
 // 4) Ver logs de shaders
 renderer.debug.checkShaderErrors = true;
+
+
+function captureCanvasPNG(maxWidth = 1000) {
+  const src = renderer.domElement;
+  // Si no queremos reescalar, devolvemos directamente:
+  if (src.width <= maxWidth) return src.toDataURL("image/png");
+
+  // Reescalar a ancho máximo (para URL más corta)
+  const scale = maxWidth / src.width;
+  const w = Math.round(src.width * scale);
+  const h = Math.round(src.height * scale);
+
+  const tmp = document.createElement('canvas');
+  tmp.width = w; tmp.height = h;
+  const ctx = tmp.getContext('2d');
+  ctx.drawImage(src, 0, 0, w, h);
+  return tmp.toDataURL("image/png");
+}
+
 
 // 6) Uniforms
 const uniforms = {
@@ -247,18 +266,140 @@ transparencyToggle.addEventListener("change", () => {
   material.uniforms.showTransmission.value = transparencyToggle.checked;
 });
 
-const generateCert = document.getElementById("descargar");
-generateCert.onclick = () => {
+// === Botón "Descargar certificado": abre certificate.html con los valores actuales ===
+const generateCert = document.getElementById('descargar');
+const nombreInput  = document.getElementById('nombre');
+const pompaInput   = document.getElementById('pompa');
 
- const nombre = userName.value
- const pompa = bubbleName.value
-
- const url =
-  `certificado.html?nombre=${encodeURIComponent(nombre)}&pompa=${encodeURIComponent(pompa)}`
-
- window.open(url)
-
+function waitImagesLoaded(root) {
+  const imgs = Array.from(root.querySelectorAll('img'));
+  if (imgs.length === 0) return Promise.resolve();
+  return Promise.all(
+    imgs.map(img =>
+      img.complete ? Promise.resolve() :
+      new Promise(res => { img.onload = img.onerror = () => res(); })
+    )
+  );
 }
+
+async function downloadCertificatePDF() {
+  // 1) Datos actuales
+  const nombre = (document.getElementById('nombre')?.value || '').trim() || '[NOMBRE]';
+  const pompa  = (document.getElementById('pompa')?.value  || '').trim() || '[NOMBRE DE LA POMPA]';
+  const n2   = Number(material.uniforms.n2.value).toFixed(2);
+  const e0   = Number(material.uniforms.e0_nm.value).toFixed(0);
+  const eavg = Number(material.uniforms.eavg_nm.value).toFixed(0);
+  const refl = material.uniforms.showTransmission?.value ? 'Si' : 'No';
+
+  // 2) Captura del canvas (redimensionado para PDF)
+  const imgDataURL = captureCanvasPNG(1000); // asegura que tienes preserveDrawingBuffer:true
+
+  // 3) Montaje del certificado en contenedor oculto
+  const root = document.getElementById('certRoot');
+  root.innerHTML = `
+  <div id="certSheet" style="
+    width:1123px;height:794px;box-sizing:border-box;padding:32px 40px;
+    background: radial-gradient(1200px 800px at 30% 20%, #2a1e65 0%, #1b1740 40%, #0b1d34 100%);
+    border:2px solid rgba(255,255,255,.15); border-radius:8px; color:#e9e7f4;
+    font-family:Segoe UI, Roboto, Helvetica, Arial, sans-serif; position:relative;">
+
+    <h1 class="cert-title">
+      CERTIFICADO DE POMPA IRIDISCENTE
+    </h1>
+
+    <p class="cert-subtitle">
+      Este documento certifica que <b style="color:#fff">${nombre}</b> ha generado la pompa
+      <b style="color:#fff">${pompa}</b> mediante la web de simulación física recogida en el QR.
+    </p>
+
+    <div style="position:absolute;right:60px;left:120px;bottom:225px;display:grid;grid-template-columns:1.05fr 1fr;gap:28px;align-items:start;">
+      <div>
+        <div style="font-weight:700;margin:0 0 8px;font-size:24px;">Datos de la pompa:</div>
+        <ul style="list-style:none;padding:0;margin:15px 0 0;">
+          <li style="display:flex;gap:10px;margin:12px 0;line-height:1.2;font-size:20px;">
+            <span style="width:12px;flex:0 0 12px;color:#fff;font-weight:700;margin-top:-1px;">•</span>
+            Índice de refracción: <span style="color:#fff;font-weight:600;margin-left:6px">${n2}</span>
+          </li>
+          <li style="display:flex;gap:10px;margin:10px 0;line-height:1.2;font-size:20px;">
+            <span style="width:12px;flex:0 0 12px;color:#fff;font-weight:700;margin-top:-1px;">•</span>
+            Espesor superior: <span style="color:#fff;font-weight:600;margin-left:6px">${e0}</span> nm
+          </li>
+          <li style="display:flex;gap:10px;margin:10px 0;line-height:1.2;font-size:20px;">
+            <span style="width:12px;flex:0 0 12px;color:#fff;font-weight:700;margin-top:-1px;">•</span>
+            Espesor promedio: <span style="color:#fff;font-weight:600;margin-left:6px">${eavg}</span> nm
+          </li>
+          <li style="display:flex;gap:10px;margin:10px 0;line-height:1.2;font-size:20px;">
+            <span style="width:12px;flex:0 0 12px;color:#fff;font-weight:700;margin-top:-1px;">•</span>
+            Efectos de la reflectancia: <span style="color:#fff;font-weight:600;margin-left:6px">${refl}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div style="
+        width:600px;
+        aspect-ratio: 25/10;
+        border:10px solid #fff;
+        border-radius:8px;
+        display:grid;
+        place-items:center;
+        overflow:hidden;
+        background:
+          radial-gradient(1250px 500px at 60% 40%, rgba(255,255,255,.12) 0, rgba(255,255,255,.04) 30%, rgba(255,255,255,.02) 60%, transparent 100%),
+          linear-gradient(140deg, rgba(255,255,255,.07) 0, rgba(255,255,255,.01) 70%);
+      ">
+        <img src="${imgDataURL}" alt="Vista de la pompa"
+            style="width:100%; height:100%; object-fit:contain; object-position:center;" />
+      </div>
+    </div>
+
+    <div style="position:absolute;left:40px;right:40px;bottom:40px;display:grid;grid-template-columns:1fr auto auto;gap:22px;align-items:end;color:#cdd0e6;font-size:13px;">
+      <div style="white-space:pre-line">
+Desarrollado por:
+• Dávila Muñoz, Mario
+• Fanjul Álvarez, Ángela
+• García Rodríguez, Santiago
+• García Tuñón, Samuel
+      </div>
+
+      <div style="display:grid;justify-items:center;gap:8px;">
+        <div>Más información en:</div>
+        <div style="width:96px;height:96px;border:2px solid rgba(255,255,255,.35);border-radius:6px;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.03);">
+          <img src="qrs/complementario.PNG" alt="QR info" style="width:100%;height:100%;object-fit:cover;" />
+        </div>
+      </div>
+      <div style="display:grid;justify-items:center;gap:8px;">
+        <div>Crea tu pompa en:</div>
+        <div style="width:96px;height:96px;border:2px solid rgba(255,255,255,.35);border-radius:6px;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.03);">
+          <img src="qrs/web.PNG" alt="QR web" style="width:100%;height:100%;object-fit:cover;" />
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  // 4) Espera a que las <img> se carguen
+  const sheet = document.getElementById('certSheet');
+  await waitImagesLoaded(sheet);
+
+  // 5) Rasteriza (escala 2 para nitidez)
+  const canvas = await html2canvas(sheet, { backgroundColor: null, scale: 2 });
+  const imgData = canvas.toDataURL('image/png');
+
+  // 6) PDF A4 apaisado
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();   // 297 mm
+  const pageH = doc.internal.pageSize.getHeight();  // 210 mm
+  const imgWmm = pageW;
+  const imgHmm = (canvas.height / canvas.width) * imgWmm;
+  const offsetY = (pageH - imgHmm) / 2;
+
+  doc.addImage(imgData, 'PNG', 0, Math.max(0, offsetY), imgWmm, imgHmm, undefined, 'FAST');
+  doc.save(`Certificado_${pompa.replace(/\s+/g,'_')}.pdf`);
+}
+
+generateCert.onclick = () => {
+  requestAnimationFrame(() => downloadCertificatePDF());
+};
 
 function animate(){
   requestAnimationFrame(animate);

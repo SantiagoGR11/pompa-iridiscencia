@@ -20,13 +20,6 @@ h1{
  text-align:center;
  margin-bottom:10px;
 
- background: linear-gradient(
-   90deg,
-   #ff4ecd,
-   #5ed3ff,
-   #7cff8f
- );
-
  -webkit-background-clip:text;
  background-clip:text;
  -webkit-text-fill-color:transparent;
@@ -144,4 +137,18 @@ button:active{
 
 section{
  margin-top:30px;
+}
+
+/* Título grande en la banda superior */
+.cert-title {
+  font-size: clamp(48px, 3.4vw, 48px);  /* sube rango */
+  letter-spacing: 0.06em;
+  font-weight: 800;
+}
+
+/* Frase debajo del título (subtítulo) */
+.cert-subtitle {
+  font-size: clamp(28px, 1.5vw, 28px);  /* más grande */
+  font-weight: 500;
+  line-height: 1.35;
 }
