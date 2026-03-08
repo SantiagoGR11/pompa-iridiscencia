@@ -292,7 +292,7 @@ async function downloadCertificatePDF() {
   const refl = material.uniforms.showTransmission?.value ? 'Si' : 'No';
 
   // 2) Captura del canvas (redimensionado para PDF)
-  const imgDataURL = captureCanvasPNG(1000); // asegura que tienes preserveDrawingBuffer:true
+  const imgDataURL = captureCanvasPNG(600); // asegura que tienes preserveDrawingBuffer:true
 
   // 3) Montaje del certificado en contenedor oculto
   const root = document.getElementById('certRoot');
