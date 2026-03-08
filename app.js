@@ -394,7 +394,19 @@ Desarrollado por:
   const offsetY = (pageH - imgHmm) / 2;
 
   doc.addImage(imgData, 'PNG', 0, Math.max(0, offsetY), imgWmm, imgHmm, undefined, 'FAST');
-  doc.save(`Certificado_${pompa.replace(/\s+/g,'_')}.pdf`);
+  
+  const blob = doc.output("blob");
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Certificado_${pompa.replace(/\s+/g,'_')}.pdf`;
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
 }
 
 generateCert.onclick = () => {
