@@ -19,7 +19,18 @@ h1{
  font-weight:700;
  text-align:center;
  margin-bottom:10px;
+ background:linear-gradient(90deg, #ff4ecd, #5ed3ff, #7cff8f);
+ -webkit-background-clip:text;
+ background-clip:text;
+ -webkit-text-fill-color:transparent;
+}
 
+h2{
+ font-size:32px;
+ font-weight:700;
+ text-align:center;
+ margin-bottom:10px;
+ 
  -webkit-background-clip:text;
  background-clip:text;
  -webkit-text-fill-color:transparent;

@@ -303,9 +303,9 @@ async function downloadCertificatePDF() {
     border:2px solid rgba(255,255,255,.15); border-radius:8px; color:#e9e7f4;
     font-family:Segoe UI, Roboto, Helvetica, Arial, sans-serif; position:relative;">
 
-    <h1 class="cert-title">
+    <h2 class="cert-title">
       CERTIFICADO DE POMPA IRIDISCENTE
-    </h1>
+    </h2>
 
     <p class="cert-subtitle">
       Este documento certifica que <b style="color:#fff">${nombre}</b> ha generado la pompa
