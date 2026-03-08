@@ -50,14 +50,14 @@ p{
  box-shadow:
  0 4px 15px rgba(0,0,0,0.35);
 
- margin-bottom:15px;
+ margin-bottom:10px;
 }
 
 input[type="range"]{
 
  width:100%;
  margin-top:6px;
- margin-bottom:10px;
+ margin-bottom:6px;
 
  accent-color:#5ed3ff;
 }
@@ -74,8 +74,8 @@ input[type="range"]{
  box-shadow:
  0 10px 35px rgba(0,0,0,0.5);
 
- margin-top:20px;
- margin-bottom:30px;
+ margin-top:15px;
+ margin-bottom:15px;
 }
 
 canvas{
@@ -97,7 +97,7 @@ canvas{
 
 input{
 
- width:100%;
+ width:95%;
 
  padding:10px;
 
