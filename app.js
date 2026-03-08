@@ -12,7 +12,9 @@ if (THREE && THREE.WebGLProgram) {
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x1f2230);
 
-const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.2, 100);
+const container = document.getElementById("simContainer");
+
+const camera = new THREE.PerspectiveCamera(60,container.clientWidth / container.clientHeight,0.2,100);
 // === Cámara en coordenadas esféricas (radio fijo) ===
 const R = 3.0;                 // distancia fija
 const thetaSlider = document.getElementById('thetaSlider');
@@ -65,7 +67,6 @@ rollSlider.addEventListener('input', () => {
 setCameraFromSpherical();
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-const container = document.getElementById("simContainer");
 renderer.setSize(container.clientWidth,container.clientHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.NoToneMapping;
@@ -121,6 +122,7 @@ function resize(){
 }
 
 window.addEventListener("resize",resize);
+resize();
 
 // ======== 1) Datos espectrales (81 muestras: 380..780 nm, paso 5 nm) ========
 const WL_START = 380, WL_END = 780, STEP = 5;
@@ -225,6 +227,7 @@ transparencyToggle.addEventListener("change", () => {
   material.uniforms.showTransmission.value = transparencyToggle.checked;
 });
 
+const generateCert = document.getElementById("descargar");
 generateCert.onclick = () => {
 
  const nombre = userName.value
