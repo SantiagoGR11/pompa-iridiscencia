@@ -312,7 +312,7 @@ async function downloadCertificatePDF() {
       <b style="color:#fff">${pompa}</b> mediante la web de simulación física recogida en el QR.
     </p>
 
-    <div style="position:absolute;right:60px;left:120px;bottom:225px;display:grid;grid-template-columns:1.05fr 1fr;gap:28px;align-items:start;">
+    <div style="position:absolute;right:120px;left:120px;bottom:210px;display:grid;grid-template-columns:1.05fr 1fr;gap:28px;align-items:start;">
       <div>
         <div style="font-weight:700;margin:0 0 8px;font-size:24px;">Datos de la pompa:</div>
         <ul style="list-style:none;padding:0;margin:15px 0 0;">
@@ -336,8 +336,8 @@ async function downloadCertificatePDF() {
       </div>
 
       <div style="
-        width:600px;
-        aspect-ratio: 25/10;
+        width:400px;
+        aspect-ratio: 500/380;
         border:10px solid #fff;
         border-radius:8px;
         display:grid;
