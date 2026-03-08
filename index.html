@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Pompa Iridiscente - MVP</title>
+    <title>Pompa Iridiscente</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- 🔧 Import Map: mapea 'three' y 'three/addons/' a unpkg -->
@@ -17,12 +17,17 @@
     </script>
 
 
-    <style>
-      html, body { margin:0; height:100%; background:#050505; }
-      canvas { display:block; }
-    </style>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
+    <h1>Simulador de la pompa iridiscente</h1>
+
+    <p>
+    Simulación física de la interferencia en películas delgadas.
+    El color depende del espesor de la película y del ángulo
+    de observación.
+    </p>
+
     <div id="camUI" style="position:fixed; left:8px; top:28px; color:#ccc; font:12px/1.2 monospace; background:#141821; padding:8px; border-radius:6px;">
       <div><b>Vista (cámara)</b></div>
       <label>θ (elevación): <span id="thetaVal">0</span>°</label><br/>
@@ -48,9 +53,31 @@
       <input id="transparencyToggle" type="checkbox" checked>
       Reflectancia
       </label>
-
     </div>
 
+    <div id="simContainer"></div>
+    <section id="confirmacion">
+
+    <h2>Confirmar tu modelo</h2>
+    <p>
+    Cuando encuentres una configuración que te guste,
+    puedes generar un certificado de tu pompa.
+    </p>
+    </section>
+
+    <section id="certificado">
+
+    <label>Tu nombre</label>
+    <input id="nombre">
+
+    <label>Nombre de la pompa</label>
+    <input id="pompa">
+
+    <button id="descargar">
+    Descargar certificado
+    </button>
+
+    </section>
 
     <!-- Orden: primero shaders/utilidades, luego app -->
     <script type="module" src="./shader.js"></script>

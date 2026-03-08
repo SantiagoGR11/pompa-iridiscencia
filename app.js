@@ -65,11 +65,12 @@ rollSlider.addEventListener('input', () => {
 setCameraFromSpherical();
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(innerWidth, innerHeight);
+const container = document.getElementById("simContainer");
+renderer.setSize(container.clientWidth,container.clientHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.NoToneMapping;
 renderer.toneMappingExposure = 1.0;
-document.body.appendChild(renderer.domElement);
+document.getElementById("simContainer").appendChild(renderer.domElement);
 
 // 4) Ver logs de shaders
 renderer.debug.checkShaderErrors = true;
@@ -108,11 +109,18 @@ const bubble = new THREE.Mesh(geometry, material);
 scene.add(bubble);
 
 // 9) Resize
-addEventListener("resize", () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-});
+function resize(){
+
+ const w = container.clientWidth;
+ const h = container.clientHeight;
+
+ camera.aspect = w/h;
+ camera.updateProjectionMatrix();
+
+ renderer.setSize(w,h);
+}
+
+window.addEventListener("resize",resize);
 
 // ======== 1) Datos espectrales (81 muestras: 380..780 nm, paso 5 nm) ========
 const WL_START = 380, WL_END = 780, STEP = 5;
@@ -216,6 +224,18 @@ eavgSlider.addEventListener("input", () => {
 transparencyToggle.addEventListener("change", () => {
   material.uniforms.showTransmission.value = transparencyToggle.checked;
 });
+
+generateCert.onclick = () => {
+
+ const nombre = userName.value
+ const pompa = bubbleName.value
+
+ const url =
+  `certificado.html?nombre=${encodeURIComponent(nombre)}&pompa=${encodeURIComponent(pompa)}`
+
+ window.open(url)
+
+}
 
 function animate(){
   requestAnimationFrame(animate);
