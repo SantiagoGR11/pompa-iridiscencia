@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pompa Iridiscente - MVP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- 🔧 Import Map: mapea 'three' y 'three/addons/' a unpkg -->
+    
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+      }
+    }
+    </script>
+
+
+    <style>
+      html, body { margin:0; height:100%; background:#050505; }
+      canvas { display:block; }
+    </style>
+  </head>
+  <body>
+    <div id="camUI" style="position:fixed; left:8px; top:28px; color:#ccc; font:12px/1.2 monospace; background:#141821; padding:8px; border-radius:6px;">
+      <div><b>Vista (cámara)</b></div>
+      <label>θ (elevación): <span id="thetaVal">0</span>°</label><br/>
+      <input id="thetaSlider" type="range" min="-89" max="89" step="1" value="0" style="width:220px"/>
+      <div></div>
+      <label>γ (roll): <span id="rollVal">0</span>°</label><br/>
+      <input id="rollSlider" type="range" min="0" max="360" step="1" value="0" style="width:220px"/>
+    </div>
+
+    <div id="physUI" style="position:fixed; left:8px; top:170px; color:#ccc; font:12px monospace; background:#141821; padding:8px; border-radius:6px;">
+      <div><b>Parámetros físicos</b></div>
+
+      <label>n₂ (Índice de refracción)</label><br>
+      <input id="n2Slider" type="range" min="1.00" max="2.00" step="0.001" value="1.33" style="width:220px"><br>
+
+      <label>e₀ (nm)</label><br>
+      <input id="e0Slider" type="range" min="10" max="400" step="5" value="50" style="width:220px"><br>
+
+      <label>e_avg (nm)</label><br>
+      <input id="eavgSlider" type="range" min="200" max="2000" step="20" value="1500" style="width:220px"><br>
+
+      <label>
+      <input id="transparencyToggle" type="checkbox" checked>
+      Reflectancia
+      </label>
+
+    </div>
+
+
+    <!-- Orden: primero shaders/utilidades, luego app -->
+    <script type="module" src="./shader.js"></script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
