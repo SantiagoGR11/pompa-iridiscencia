@@ -1,0 +1,165 @@
+/* Definition of some useful sets for the website */
+
+body{
+ font-family: system-ui, -apple-system, sans-serif;
+ margin:0;
+ padding:20px;
+
+ color:#f2f3f7;
+
+ background:
+ radial-gradient(circle at 20% 20%, #1c2040, transparent 40%),
+ radial-gradient(circle at 80% 0%, #202a55, transparent 35%),
+ #0e0f1a;
+
+ max-width:900px;
+ margin:auto;
+}
+
+h1{
+ font-size:32px;
+ font-weight:700;
+ text-align:center;
+ margin-bottom:10px;
+ background:linear-gradient(90deg, #ff4ecd, #5ed3ff, #7cff8f);
+ -webkit-background-clip:text;
+ background-clip:text;
+ -webkit-text-fill-color:transparent;
+}
+
+h2{
+ font-size:32px;
+ font-weight:700;
+ text-align:center;
+ margin-bottom:10px;
+ 
+ -webkit-background-clip:text;
+ background-clip:text;
+ -webkit-text-fill-color:transparent;
+}
+
+p{
+ color:#a9adc6;
+ font-size:15px;
+ line-height:1.5;
+ text-align:center;
+ margin-bottom:25px;
+}
+
+#camUI,#physUI{
+
+ background:#171a2b;
+ padding:14px;
+
+ border-radius:12px;
+
+ box-shadow:
+ 0 4px 15px rgba(0,0,0,0.35);
+
+ margin-bottom:10px;
+}
+
+input[type="range"]{
+
+ width:100%;
+ margin-top:6px;
+ margin-bottom:6px;
+
+ accent-color:#5ed3ff;
+}
+
+#simContainer{
+
+ width:400px;
+ height:350px;
+
+ border-radius:16px;
+
+ overflow:hidden;
+
+ box-shadow:
+ 0 10px 35px rgba(0,0,0,0.5);
+
+ margin-top:15px;
+ margin-bottom:15px;
+}
+
+canvas{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+#certificado{
+
+ background:#171a2b;
+
+ padding:20px;
+
+ border-radius:14px;
+
+ margin-top:25px;
+}
+
+input{
+
+ width:95%;
+
+ padding:10px;
+
+ border-radius:8px;
+
+ border:none;
+
+ margin-top:6px;
+ margin-bottom:15px;
+
+ background:#0f1120;
+ color:#f2f3f7;
+}
+
+button{
+
+ width:100%;
+
+ padding:12px;
+
+ border:none;
+
+ border-radius:10px;
+
+ font-weight:600;
+
+ background:linear-gradient(
+ 90deg,
+ #ff4ecd,
+ #5ed3ff,
+ #7cff8f
+ );
+
+ color:#0e0f1a;
+
+ cursor:pointer;
+
+ transition:transform .15s ease;
+}
+
+button:active{
+ transform:scale(0.97);
+}
+
+section{
+ margin-top:30px;
+}
+
+.cert-title {
+  font-size: clamp(48px, 3.4vw, 48px);
+  letter-spacing: 0.06em;
+  font-weight: 800;
+}
+
+.cert-subtitle {
+  font-size: clamp(20px, 1.5vw, 20px);  
+  font-weight: 500;
+  line-height: 1.35;
+}
