@@ -23,7 +23,7 @@ The full scientific poster associated with this project is available here:
 👉 **[Download the poster (PDF)](visuals/POSTER_Calculadora-Laser.pdf)**
 
 <p align="center">
-  <img src="visuals/poster_preview.png" width="700">
+  <img src="visuals/Poster_Preview.png" width="700">
 </p>
 
 ---
