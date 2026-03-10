@@ -1,0 +1,7 @@
+# This project runs entirely in the browser.
+# No Python dependencies are required.
+#
+# External libraries are loaded via CDN:
+# - three.js
+# - html2canvas
+# - jsPDF
