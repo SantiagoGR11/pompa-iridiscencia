@@ -109,8 +109,8 @@ pompa-iridiscencia/
 │   
 │  
 ├── visuals/   
-│   ├── POSTER_Laser-Calculator       # Proyect presentation  
-│   └── poster_preview                # Proyect prewiew  
+│   ├── POSTER_Iridescent-Bubble.pdf      # Proyect presentation  
+│   └── Poster_Preview.png                # Proyect prewiew  
 │  
 ├── docs/   
 │   ├── index.html         
