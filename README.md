@@ -12,7 +12,7 @@ The project was developed as part of the Optics course in the Physics Degree at 
 
 The simulation can be explored directly in the browser:
 
-👉 **[Open the web simulation](docs/POSTER_Calculadora-Laser.pdf)**
+👉 **[Open the web simulation](https://santiagogr11.github.io/pompa-iridiscencia/)**
 
 ---
 
@@ -20,10 +20,10 @@ The simulation can be explored directly in the browser:
 
 The full scientific poster associated with this project is available here:
 
-👉 **[Download the poster (PDF)](docs/POSTER_Calculadora-Laser.pdf)**
+👉 **[Download the poster (PDF)](visuals/POSTER_Calculadora-Laser.pdf)**
 
 <p align="center">
-  <img src="docs/poster_preview.png" width="700">
+  <img src="visuals/poster_preview.png" width="700">
 </p>
 
 ---
