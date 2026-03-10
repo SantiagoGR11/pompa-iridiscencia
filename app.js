@@ -254,18 +254,21 @@ const eavgSlider = document.getElementById("eavgSlider");
 const transparencyToggle = document.getElementById("transparencyToggle");
 const lightType = document.getElementById("lightType");
 const lambdaSlider = document.getElementById("lambdaSlider");
-const lambdaVal = document.getElementById("lambdaVal");
+const deslambdaSlider = document.getElementById("deslambdaSlider");
 
 // Los <span> que muestran el valor
 const n2Val   = document.getElementById("n2Val");
 const e0Val   = document.getElementById("e0Val");
 const eavgVal = document.getElementById("eavgVal");
+const lambdaVal = document.getElementById("lambdaVal");
+const deslambdaVal = document.getElementById("deslambdaVal");
 
 // Inicializa los span con el valor actual de los sliders
 n2Val.textContent   = Number(n2Slider.value).toFixed(2);
 e0Val.textContent   = Number(e0Slider.value).toFixed(0);
 eavgVal.textContent = Number(eavgSlider.value).toFixed(0);
 lambdaVal.textContent = Number(lambdaSlider.value).toFixed(0);
+deslambdaVal.textContent = Number(deslambdaSlider.value).toFixed(0);
 
 // Listeners: actualizan uniform y número visible
 n2Slider.addEventListener("input", () => {
@@ -301,6 +304,12 @@ lambdaSlider.addEventListener("input", () => {
   const v = Number(lambdaSlider.value);
   material.uniforms.lambda0.value = v;
   lambdaVal.textContent = v.toFixed(0);
+});
+
+deslambdaSlider.addEventListener("input", () => {
+  const v = Number(deslambdaSlider.value);
+  material.uniforms.spectralWidth.value = v;
+  deslambdaVal.textContent = v.toFixed(0);
 });
 
 // === Botón "Descargar certificado": abre certificate.html con los valores actuales ===
