@@ -4,7 +4,8 @@
 This project implements a physics-based interactive simulation of the iridescence observed in soap bubbles.
 The model reproduces thin-film interference by combining Fresnel reflection coefficients, phase delay in thin films, and spectral integration across the visible range.
 
-The project was developed as part of the Optics course in the Physics Degree at the University of Oviedo.
+The poster included in this repository was created for the Optics course at the University of Oviedo and is written in Spanish.
+However, the interactive simulator and documentation, written in English, provide the necessary context for international readers.
 
 ---
 
