@@ -108,18 +108,18 @@ pompa-iridiscencia/
 │   
 │  
 ├── visuals/   
-│   └── POSTER_Laser-Calculator       # Proyect presentation  
+│   ├── POSTER_Laser-Calculator       # Proyect presentation  
 │   └── poster_preview                # Proyect prewiew  
 │  
 ├── docs/   
 │   ├── index.html         
 │   ├── style.css      
 │   ├── app.js     
-│   ├── shader.js        
+│   └── shader.js        
 │  
 ├── README.md  
-└── LICENSE  
-└── .gitignore  
+├── LICENSE  
+├── .gitignore  
 └── requirements.txt  
 
 ---
@@ -172,7 +172,7 @@ Developed by:
  - Mario Dávila Muñoz
  - Ángela Fanjul Álvarez
  - Santiago García Rodríguez
- -Samuel García Tuñón
+ - Samuel García Tuñón
 
 Physics Degree - University of Oviedo
 
