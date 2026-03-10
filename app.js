@@ -1,60 +1,100 @@
-// 0) Importa Three.js desde CDN (no necesitas archivo local)
+// === IMPORT OF THREE.JS ===========================================
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
-// 2) Opcional: mostrar errores de shader en consola (después del import)
+
+
+// === CONTROL OF ERRORS BY CONSOLE ==========================================================
 if (THREE && THREE.WebGLProgram) {
   THREE.WebGLProgram.prototype.getShaderInfoLog = function () {
     return this.__log || "";
   };
 }
 
-// 3) Escena básica
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x1f2230);
 
-const container = document.getElementById("simContainer");
-const lambdaControl = document.getElementById("lambdaControl");
-
-const camera = new THREE.PerspectiveCamera(60,container.clientWidth / container.clientHeight,0.2,100);
-// === Cámara en coordenadas esféricas (radio fijo) ===
-const R = 3.0;                 // distancia fija
-const thetaSlider = document.getElementById('thetaSlider');
-const rollSlider  = document.getElementById('rollSlider');   // 0..360 (roll)
-
-const thetaVal    = document.getElementById('thetaVal');
-const rollVal  = document.getElementById('rollVal');
-
-// Estado inicial
-let thetaDeg = Number(thetaSlider.value); // [-89..89]
-let rollDeg  = Number(rollSlider?.value ?? 0);
-
-// Conversión grados->radianes
+// === USEFUL FUNCTIONS =======================================================================
 const deg2rad = d => d * Math.PI / 180.0;
 
-// Coloca la cámara según (phi, theta)
-function setCameraFromSpherical() {
-  const theta = deg2rad(thetaDeg);        // elevación
-  const gamma = deg2rad(rollDeg);    // roll (0..2π)
-
-  // Sólida parametrización (elevación = ángulo sobre el plano XZ)
-  // x = 0
-  // y = R * sin(theta)
-  // z = R * cos(theta)
+function setCameraFromSpherical() { // Setting the camera position
+  const theta = deg2rad(thetaDeg);   
+  const gamma = deg2rad(rollDeg);    
+  // Parameterization
   const x = 0;
   const y = R * Math.sin(theta);
   const z = R * Math.cos(theta);
-
+  // Set camera position and orientation
   camera.position.set(x, y, z);
   camera.lookAt(0, 0, 0);
   camera.rotateZ(gamma);
   camera.updateProjectionMatrix();
-
-  // UI
+  // Update UI values
   thetaVal.textContent = thetaDeg.toFixed(0);
   rollVal.textContent = rollDeg.toFixed(0);
 }
 
-// Listeners UI
+function updateLightUI() { // Show/hide controls in the website depending on the light mode selected
+  if (lightType.value === "white") {
+    material.uniforms.lightMode.value = 0;
+    lambdaControl.style.display = "none";
+  } else {
+    material.uniforms.lightMode.value = 1;
+    lambdaControl.style.display = "block";
+  }
+}
+
+function captureCanvasPNG(maxWidth = 1000) { // Capture the canvas content as a PNG
+  const src = renderer.domElement;
+  if (src.width <= maxWidth) return src.toDataURL("image/png");
+  const scale = maxWidth / src.width;
+  const w = Math.round(src.width * scale);
+  const h = Math.round(src.height * scale);
+  const tmp = document.createElement('canvas');
+  tmp.width = w; tmp.height = h;
+  const ctx = tmp.getContext('2d');
+  ctx.drawImage(src, 0, 0, w, h);
+  return tmp.toDataURL("image/png");
+}
+
+function waitImagesLoaded(root) { // Wait until all the images in a container are loaded
+  const imgs = Array.from(root.querySelectorAll('img'));
+  if (imgs.length === 0) return Promise.resolve();
+  return Promise.all(
+    imgs.map(img =>
+      img.complete ? Promise.resolve() :
+      new Promise(res => { img.onload = img.onerror = () => res(); })
+    )
+  );
+}
+
+function animate(){ // Animation loop to render and update the canvas
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+
+
+// === GENERATION OF THE CONTAINER FOR THE SIMULATION AND ITS COMPONENTS ==============================
+const container = document.getElementById("simContainer");
+
+
+// === CREATION OF THE SCENE FOR THE SIMULATION OF THE BUBBLE =========================================
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1f2230);
+
+
+// === SETTING UP A CAMERA PERSPECTIVE ===============================================================
+const camera = new THREE.PerspectiveCamera(60,container.clientWidth / container.clientHeight,0.2,100);
+
+// Controls: radius value and sliders for angles (theta: elevation, roll: rotation around the view axis)
+const R = 3.0;                 
+const thetaSlider = document.getElementById('thetaSlider');
+const rollSlider  = document.getElementById('rollSlider');
+const thetaVal    = document.getElementById('thetaVal');
+const rollVal  = document.getElementById('rollVal');
+
+// Initial setting
+let thetaDeg = Number(thetaSlider.value); 
+let rollDeg  = Number(rollSlider?.value ?? 0);
+
+// Listeners of the camera UI
 thetaSlider.addEventListener('input', () => {
   thetaDeg = Number(thetaSlider.value);
   setCameraFromSpherical();
@@ -64,110 +104,63 @@ rollSlider.addEventListener('input', () => {
   setCameraFromSpherical();
 });
 
-function updateLightUI() {
-
-  if (lightType.value === "white") {
-
-    material.uniforms.lightMode.value = 0;
-    lambdaControl.style.display = "none";
-
-  } else {
-
-    material.uniforms.lightMode.value = 1;
-    lambdaControl.style.display = "block";
-
-  }
-
-}
-
-// Colocar cámara al iniciar
+// Placing the camera in the initial position
 setCameraFromSpherical();
 
+
+// === CREATION OF THE WEBGL RENDERER AND ITS SETTINGS ===============================
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(container.clientWidth,container.clientHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.NoToneMapping;
 renderer.toneMappingExposure = 1.0;
+
+// Append the renderer to a container in the HTML to show the simulation
 document.getElementById("simContainer").appendChild(renderer.domElement);
 
-// 4) Ver logs de shaders
-renderer.debug.checkShaderErrors = true;
 
-
-function captureCanvasPNG(maxWidth = 1000) {
-  const src = renderer.domElement;
-  // Si no queremos reescalar, devolvemos directamente:
-  if (src.width <= maxWidth) return src.toDataURL("image/png");
-
-  // Reescalar a ancho máximo (para URL más corta)
-  const scale = maxWidth / src.width;
-  const w = Math.round(src.width * scale);
-  const h = Math.round(src.height * scale);
-
-  const tmp = document.createElement('canvas');
-  tmp.width = w; tmp.height = h;
-  const ctx = tmp.getContext('2d');
-  ctx.drawImage(src, 0, 0, w, h);
-  return tmp.toDataURL("image/png");
-}
-
-
-// 6) Uniforms
+// === DEFINITION OF THE CUANTITIES OF THE PHYSICAL MODEL ==============================
 const uniforms = {
+  // Material parameters
   n1: { value: 1.0 },
   n2: { value: 1.33 },
   n3: { value: 1.0 },
 
+  // Light parameters
   Ldir: { value: new THREE.Vector3(0,-1,0) },
-  lightMode: { value: 0 },   // 0 = blanca, 1 = monocromática
-  lambda0:   { value: 550.0 }, // nm , longitud de onda central para luz monocromática
-  spectralWidth: { value: 50.0 }, // nm , ancho espectral para luz monocromática (desviación típica de la gaussiana)
+  lightMode: { value: 0 },   // 0 = white, 1 = monochromatic
+  lambda0:   { value: 550.0 }, // nm , central wavelength for monochromatic light
+  spectralWidth: { value: 50.0 }, // nm , spectral width for monochromatic light (standard desviation of a gaussian)
 
-  transAnglePower: { value: 1.5 },
-  transAngleFloor: { value: 0.15 },
+  // Bubble geometry parameters
+  e0_nm: { value: 50.0 },
+  eavg_nm: { value: 900.0 },
 
-  e0_nm: { value: 10.0 },
-  eavg_nm: { value: 1000.0 },
-
+  // Reflectance effects
   showTransmission: { value: true }
 };
 
-// 7) Material: empieza con el TEST (colorines garantizados)
+
+// === CREATION OF THE MATERIAL OF THE BUBBLE ==============================================
 const material = new THREE.ShaderMaterial({
   vertexShader:   globalThis.__bubbleVertex__,
   fragmentShader: globalThis.__bubbleFragPhysical__,
-  uniforms,                      // tus uniforms físicos (n1,n2,n3,h0/alpha o e0/eavg, cmfTex, wl, k_norm...)
+  uniforms,                     
   side: THREE.DoubleSide,
-  transparent: true,             // ¡importante!
-  depthWrite: false              // para que el blending funcione bien
+  transparent: true,          
+  depthWrite: false 
 });
 
 
-// 8) Malla
+// === GENERATION OF THE BUBBLE BY ITS GEOMETRY AND MATERIAL ===============================
 const geometry = new THREE.SphereGeometry(1, 256, 256);
 const bubble = new THREE.Mesh(geometry, material);
 scene.add(bubble);
 
-// 9) Resize
-function resize(){
 
- const w = container.clientWidth;
- const h = container.clientHeight;
-
- camera.aspect = w/h;
- camera.updateProjectionMatrix();
-
- renderer.setSize(w,h);
-}
-
-window.addEventListener("resize",resize);
-resize();
-
-// ======== 1) Datos espectrales (81 muestras: 380..780 nm, paso 5 nm) ========
+// ==== SPECTRAL DATA OF THE CIE COLOR MATCHING FUNCTIONS AND D65 ILLUMINANT ================
 const WL_START = 380, WL_END = 780, STEP = 5;
 const N = ((WL_END - WL_START) / STEP) + 1;
-
-// Arrays reales (FLOAT32) longitud N:
 const cie_x = new Float32Array([
   0.001368,0.002236,0.004243,0.007650,0.014310,0.023190,0.043510,0.077630,0.134380,0.214770,
   0.283900,0.328500,0.348280,0.348060,0.336200,0.318700,0.290800,0.251100,0.195360,0.142100,
@@ -212,13 +205,13 @@ const d65   = new Float32Array([
   69.28,72.30,75.32,69.67,64.02,57.10,50.19,54.17,58.15,57.85,57.55
 ]);
 
-// Normalización k = 1 / sum(E(λ)*ybar(λ)*Δλ)
+// Normalization of the D65 spectrum
 let sumEy = 0;
 for (let i=0;i<N;i++) sumEy += d65[i]*cie_y[i];
 const delta = STEP; // nm
 const k_norm = 1.0 / (sumEy * delta);
 
-// Empaquetamos en RGBA: R=x̄, G=ȳ, B=z̄, A=E_D65
+// Packaging in RGBA: R=x̄, G=ȳ, B=z̄, A=E_D65
 const data = new Float32Array(N*4);
 for (let i=0;i<N;i++){
   data[4*i+0] = cie_x[i];
@@ -227,7 +220,7 @@ for (let i=0;i<N;i++){
   data[4*i+3] = d65[i];
 }
 
-// Texture 1D (como 2D de 1xN), Float32
+// Texture 1D, Float32
 const cmfTex = new THREE.DataTexture(data, N, 1, THREE.RGBAFormat, THREE.FloatType);
 cmfTex.needsUpdate = true;
 cmfTex.magFilter = THREE.NearestFilter;       
@@ -236,41 +229,40 @@ cmfTex.generateMipmaps = false;
 cmfTex.wrapS = THREE.ClampToEdgeWrapping;    
 cmfTex.wrapT = THREE.ClampToEdgeWrapping;
 
-
-// Pasa uniforms nuevos al material (añade a los existentes)
+// Adding the spectral data as uniforms to the material
 material.uniforms.cmfTex = { value: cmfTex };
 material.uniforms.wlStart = { value: WL_START };
 material.uniforms.wlEnd   = { value: WL_END };
 material.uniforms.stepNm  = { value: STEP };
 material.uniforms.kNorm   = { value: k_norm };
 
-material.uniforms.transAnglePower = { value: 2.0 };  // p, típico 1.0..3.0   (control angular de T)
-material.uniforms.transAngleFloor = { value: 0.1 };  // A_min, típico 0.05..0.25 (suelo de transmisión)
 
-// ======== SLIDERS FÍSICOS ========
+// === CONTROL OF THE SIMULATION WITH THE PHYSICAL PARAMETERS =========================
+// Link the sliders of the UI with the corresponding uniforms of the shader
 const n2Slider   = document.getElementById("n2Slider");
 const e0Slider   = document.getElementById("e0Slider");
 const eavgSlider = document.getElementById("eavgSlider");
 const transparencyToggle = document.getElementById("transparencyToggle");
 const lightType = document.getElementById("lightType");
+const lambdaControl = document.getElementById("lambdaControl");
 const lambdaSlider = document.getElementById("lambdaSlider");
 const deslambdaSlider = document.getElementById("deslambdaSlider");
 
-// Los <span> que muestran el valor
+// Link the values of the UI with the corresponding uniforms of the shader
 const n2Val   = document.getElementById("n2Val");
 const e0Val   = document.getElementById("e0Val");
 const eavgVal = document.getElementById("eavgVal");
 const lambdaVal = document.getElementById("lambdaVal");
 const deslambdaVal = document.getElementById("deslambdaVal");
 
-// Inicializa los span con el valor actual de los sliders
+// Matching the initial values of the UI with the initial values of the shader uniforms
 n2Val.textContent   = Number(n2Slider.value).toFixed(2);
 e0Val.textContent   = Number(e0Slider.value).toFixed(0);
 eavgVal.textContent = Number(eavgSlider.value).toFixed(0);
 lambdaVal.textContent = Number(lambdaSlider.value).toFixed(0);
 deslambdaVal.textContent = Number(deslambdaSlider.value).toFixed(0);
 
-// Listeners: actualizan uniform y número visible
+// Listeners of the physical UI
 n2Slider.addEventListener("input", () => {
   const v = Number(n2Slider.value);
   material.uniforms.n2.value = v;      
@@ -312,35 +304,46 @@ deslambdaSlider.addEventListener("input", () => {
   deslambdaVal.textContent = v.toFixed(0);
 });
 
-// === Botón "Descargar certificado": abre certificate.html con los valores actuales ===
+
+// === GENERATION OF THE PERSONALIZED CERTIFICATE AS A PDF ===============================================
 const generateCert = document.getElementById('descargar');
-const nombreInput  = document.getElementById('nombre');
-const pompaInput   = document.getElementById('pompa');
 
-function waitImagesLoaded(root) {
-  const imgs = Array.from(root.querySelectorAll('img'));
-  if (imgs.length === 0) return Promise.resolve();
-  return Promise.all(
-    imgs.map(img =>
-      img.complete ? Promise.resolve() :
-      new Promise(res => { img.onload = img.onerror = () => res(); })
-    )
-  );
-}
-
+// Function to generate the certificate with the current data and download it as a PDF
 async function downloadCertificatePDF() {
-  // 1) Datos actuales
+  // 1.- Current UI and requested data
   const nombre = (document.getElementById('nombre')?.value || '').trim() || '[NOMBRE]';
   const pompa  = (document.getElementById('pompa')?.value  || '').trim() || '[NOMBRE DE LA POMPA]';
   const n2   = Number(material.uniforms.n2.value).toFixed(2);
   const e0   = Number(material.uniforms.e0_nm.value).toFixed(0);
   const eavg = Number(material.uniforms.eavg_nm.value).toFixed(0);
   const refl = material.uniforms.showTransmission?.value ? 'Si' : 'No';
+  const lightMode = material.uniforms.lightMode.value;
+  const lambda0 = Number(material.uniforms.lambda0.value).toFixed(0);
+  const spectralWidth = Number(material.uniforms.spectralWidth.value).toFixed(0);
+  const lightType = (lightMode === 0) ? "Blanca" : "Monocromática";
 
-  // 2) Captura del canvas (redimensionado para PDF)
-  const imgDataURL = captureCanvasPNG(600); // asegura que tienes preserveDrawingBuffer:true
+  // 2.- Conditional data for the certificate depending on the light mode
+  let lightExtra = "";
+  if (lightMode === 1) {
+    lightExtra = `
+    <li style="display:flex;gap:10px;margin:10px 0;line-height:1.2;font-size:20px;">
+      <span style="width:12px;flex:0 0 12px;color:#fff;font-weight:700;margin-top:-1px;">•</span>
+      Longitud de onda máxima:
+      <span style="color:#fff;font-weight:600;margin-left:6px">${lambda0}</span> nm
+    </li>
 
-  // 3) Montaje del certificado en contenedor oculto
+    <li style="display:flex;gap:10px;margin:10px 0;line-height:1.2;font-size:20px;">
+      <span style="width:12px;flex:0 0 12px;color:#fff;font-weight:700;margin-top:-1px;">•</span>
+      Ancho espectral:
+      <span style="color:#fff;font-weight:600;margin-left:6px">${spectralWidth}</span> nm
+    </li>
+    `;
+  }
+
+  // 3.- Capture of the bubble image as PNG
+  const imgDataURL = captureCanvasPNG(600); 
+
+  // 4.- Design of the certificate in HTML with inline CSS 
   const root = document.getElementById('certRoot');
   root.innerHTML = `
   <div id="certSheet" style="
@@ -379,6 +382,21 @@ async function downloadCertificatePDF() {
             Efectos de la reflectancia: <span style="color:#fff;font-weight:600;margin-left:6px">${refl}</span>
           </li>
         </ul>
+        <div style="margin-top:20px;">
+        <div style="font-weight:700;margin:0 0 8px;font-size:24px;">Datos de la luz:</div>
+
+        <ul style="list-style:none;padding:0;margin:15px 0 0;">
+
+          <li style="display:flex;gap:10px;margin:12px 0;line-height:1.2;font-size:20px;">
+            <span style="width:12px;flex:0 0 12px;color:#fff;font-weight:700;margin-top:-1px;">•</span>
+            Tipo de luz:
+            <span style="color:#fff;font-weight:600;margin-left:6px">${lightType}</span>
+          </li>
+
+          ${lightExtra}
+
+        </ul>
+</div>
       </div>
 
       <div style="
@@ -422,19 +440,19 @@ Desarrollado por:
     </div>
   </div>`;
 
-  // 4) Espera a que las <img> se carguen
+  // 5.- Wait until all images are loaded
   const sheet = document.getElementById('certSheet');
   await waitImagesLoaded(sheet);
 
-  // 5) Rasteriza (escala 2 para nitidez)
+  // 6.- Rasterize the canvas into a single image
   const canvas = await html2canvas(sheet, { backgroundColor: null, scale: 2 });
   const imgData = canvas.toDataURL('image/png');
 
-  // 6) PDF A4 apaisado
+  // 7.- Generate a PDF with jsPDF and add the rasterized image
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-  const pageW = doc.internal.pageSize.getWidth();   // 297 mm
-  const pageH = doc.internal.pageSize.getHeight();  // 210 mm
+  const pageW = doc.internal.pageSize.getWidth(); 
+  const pageH = doc.internal.pageSize.getHeight(); 
   const imgWmm = pageW;
   const imgHmm = (canvas.height / canvas.width) * imgWmm;
   const offsetY = (pageH - imgHmm) / 2;
@@ -443,25 +461,21 @@ Desarrollado por:
   
   const blob = doc.output("blob");
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement("a");
+
+  // 8.- Trigger the download of the PDF
   a.href = url;
   a.download = `Certificado_${pompa.replace(/\s+/g,'_')}.pdf`;
-
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-
   URL.revokeObjectURL(url);
 }
 
+// Active the download of the certificate when clicking the button
 generateCert.onclick = () => {
   requestAnimationFrame(() => downloadCertificatePDF());
 };
 
-function animate(){
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-
-}
+// === ANIMATION LOOP OF THE WEBSITE ========================================================
 animate();

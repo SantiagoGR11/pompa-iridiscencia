@@ -2,10 +2,10 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Pompa Iridiscente</title>
+    <title>Simulador-Pompa-Iridiscente</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- 🔧 Import Map: mapea 'three' y 'three/addons/' a unpkg -->
+    <!-- Import maps, modules and link with other scripts -->
     
     <script type="importmap">
     {
@@ -20,8 +20,16 @@
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
     <link rel="stylesheet" href="style.css">
+    <script type="module" src="./shader.js"></script>
+    <script type="module" src="./app.js"></script>
+
+  <!-- Design of the website -->
+
   </head>
   <body>
+
+    <!-- Heading -->
+
     <h1>Simulador de la iridiscencia de una pompa</h1>
 
     <p>
@@ -31,6 +39,8 @@
     que, junto con otros parámetros de la pompa, crean el arcoíris que vemos en su superficie.
     </p>
 
+    <!-- Controls for camera perspective -->
+
     <div id="camUI" style="left:8px; top:28px; color:#ccc; font:12px/1.2 monospace; background:#141821; padding:8px; border-radius:6px;">
       <div><b>Perspectiva de la cámara</b></div>
       <label>Elevación: <span id="thetaVal">0</span>°</label><br/>
@@ -39,6 +49,8 @@
       <label>Inclinación: <span id="rollVal">0</span>°</label><br/>
       <input id="rollSlider" type="range" min="0" max="360" step="1" value="0" style="width:220px"/>
     </div>
+
+    <!-- Controls for environmental and physical parameters -->
 
     <div id="physUI" style="left:8px; top:170px; color:#ccc; font:12px monospace; background:#141821; padding:8px; border-radius:6px;">
       <div><b>Parámetros físicos</b></div>
@@ -69,7 +81,12 @@
 
     </div>
 
+    <!-- Interactive simulation -->
+
     <div id="simContainer"></div>
+
+    <!-- Confirmation and download of the personalized model -->
+
     <section id="confirmacion">
 
     <h2>Confirma y házte con tu modelo</h2>
@@ -95,9 +112,6 @@
     </section>
 
   <div id="certRoot" style="position:fixed; left:-20000px; top:0; width:1123px; height:794px;"></div>
-    
-  <script type="module" src="./shader.js"></script>
-  <script type="module" src="./app.js"></script>
 
   </body>
 

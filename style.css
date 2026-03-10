@@ -1,3 +1,5 @@
+/* Definition of some useful sets for the website */
+
 body{
  font-family: system-ui, -apple-system, sans-serif;
  margin:0;
@@ -150,16 +152,14 @@ section{
  margin-top:30px;
 }
 
-/* Título grande en la banda superior */
 .cert-title {
-  font-size: clamp(48px, 3.4vw, 48px);  /* sube rango */
+  font-size: clamp(48px, 3.4vw, 48px);
   letter-spacing: 0.06em;
   font-weight: 800;
 }
 
-/* Frase debajo del título (subtítulo) */
 .cert-subtitle {
-  font-size: clamp(20px, 1.5vw, 20px);  /* más grande */
+  font-size: clamp(20px, 1.5vw, 20px);  
   font-weight: 500;
   line-height: 1.35;
 }

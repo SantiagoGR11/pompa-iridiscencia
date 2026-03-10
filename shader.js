@@ -1,79 +1,76 @@
 // ============================================================================
-// shader.js — Pompa iridiscente (versión estable, con mezcla blanca homogénea)
-// Exporta 2 strings GLSL en globalThis: __bubbleVertex__, __bubbleFragPhysical__
+// shader.js — Iridescent bubble
+// Export 2 strings GLSL in globalThis: __bubbleVertex__, __bubbleFragPhysical__
 // ============================================================================
 
 // ----------------------------- VERTEX SHADER --------------------------------
 globalThis.__bubbleVertex__ = /* glsl */`
 precision highp float;
 
-varying vec3 vNormalObj;  // normal en espacio OBJETO
-varying vec3 vPosObj;     // posición en espacio OBJETO
+varying vec3 vNormalObj;  // normal in the OBJECT space
+varying vec3 vPosObj;     // position in the OBJECT space
 
 void main(){
-  // Todo en OBJETO (no usamos normalMatrix ni modelView aquí)
   vNormalObj = normalize(normal);
   vPosObj    = position;
 
-  // La proyección final sí usa las matrices estándar para dibujar
+  // FINAL PROJECTION
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
-// ------------------------ FRAGMENT SHADER FÍSICO ----------------------------
+// ------------------------ FRAGMENT PHYSICAL SHADER ----------------------------
 globalThis.__bubbleFragPhysical__ = /* glsl */`
 precision highp float;
 
 varying vec3 vNormalObj;
 varying vec3 vPosObj;
 
-// ---- Parámetros de espesor ----
-uniform int   thicknessModel;   // 1: e(φ)=e0+(eavg-e0)*(1-cosφ); 0: exponencial
-uniform float e0_nm;            // nm (arriba)
-uniform float eavg_nm;          // nm (medio)
-uniform float h0;               // nm (solo si thicknessModel==0)
-uniform float alpha;            // drenaje (solo si thicknessModel==0)
+// ---- Thickness parameters ----
+uniform float e0_nm;            // nm 
+uniform float eavg_nm;          // nm 
+uniform float alpha;            // drainage
 
-// ---- Óptica ----
-uniform float n1;               // IOR medio 1 (aire)
-uniform float n2;               // IOR película
-uniform float n3;               // IOR medio 2 (aire)
+// ---- Optics parameters ----
+uniform float n1;               // IOR air
+uniform float n2;               // IOR film
+uniform float n3;               // IOR air
 
-// ---- Espectro CIE+D65 por textura (81 λ). RGBA = (x̄,ȳ,z̄,E) ----
+// ---- Spectrum CIE+D65 by texture (81 λ). RGBA = (x̄,ȳ,z̄,E) ----
 uniform sampler2D cmfTex;
 uniform float wlStart;          // 380
 uniform float wlEnd;            // 780
 uniform float stepNm;           // 5
 uniform float kNorm;            // 1 / sum(E*ybar)*Δλ
 
-uniform float transAnglePower;  // p, típico 1.0..3.0   (control angular de T)
-uniform float transAngleFloor;  // A_min, típico 0.05..0.25 (suelo de transmisión)
-uniform vec3 Ldir;          // dirección de luz en espacio de vista
+// ---- Light parameters ----
+uniform vec3 Ldir;       
 uniform int lightMode;
 uniform float lambda0;
 uniform float spectralWidth;
 
-
+// ---- Reflectance parameter ----
 uniform bool showTransmission;
 
+
+// -------------------------- Constant values --------------------------------
 const float PI = 3.14159265358979323846;
-const float PImed = 1.5757463268;
 
-// -------------------------- Utilidades espectrales --------------------------
+// -------------------------- Spectral utilities --------------------------
 
-const int NS = 81;  // 380..780 nm, paso 5 nm
+const int NS = 81;  // 380..780 nm, step 5 nm
 
 vec4 sampleSpectral(int i){
-  float u = (float(i) + 0.5) / float(NS);  // centro del texel en 1xN
+  float u = (float(i) + 0.5) / float(NS); 
   return texture2D(cmfTex, vec2(u, 0.5));
 }
 
-// -------------------------- Modelos de espesor ------------------------------
+// -------------------------- Thickness model ------------------------------
 float thickness_nm_from_cosphi(float cosPhi){
   cosPhi = clamp(cosPhi, -1.0, 1.0);
   return e0_nm + (eavg_nm - e0_nm) * (1.0 - cosPhi);
 }
 
-// -------------------------- Fresnel (amplitud) ------------------------------
+// -------------------------- Fresnel (amplitude) ------------------------------
 void fresnel(float ni,float nt,float cosi,
              out float rs,out float rp,out float cost)
 {
@@ -88,8 +85,8 @@ void fresnel(float ni,float nt,float cosi,
   rp = (nt*cosi - ni*cost) / (nt*cosi + ni*cost);
 }
 
-// -------------------------- XYZ → sRGB --------------------------------------
-// XYZ -> LINEAR RGB (no compandado)
+// -------------------------- XYZ to sRGB --------------------------------------
+// XYZ -> LINEAR RGB (no commanded)
 vec3 xyz2rgbLinear(vec3 XYZ){
   mat3 M = mat3(
      3.2406, -1.5372, -0.4986,
@@ -99,14 +96,14 @@ vec3 xyz2rgbLinear(vec3 XYZ){
   return max(M * XYZ, vec3(0.0));
 }
 
-// LINEAR -> sRGB (compandado)
+// LINEAR -> sRGB (commanded)
 vec3 linear2srgb(vec3 lin){
   vec3 a = 12.92 * lin;
   vec3 b = 1.055 * pow(max(lin, vec3(0.0)), vec3(1.0/2.4)) - 0.055;
   return mix(a, b, step(vec3(0.0031308), lin));
 }
 
-// sRGB -> LINEAR (por si usas envColor != vec3(1.0))
+// sRGB -> LINEAR (for input textures, if needed)
 vec3 srgb2linear(vec3 c){
   vec3 lo = c / 12.92;
   vec3 hi = pow((c + 0.055)/1.055, vec3(2.4));
@@ -120,17 +117,14 @@ void main(){
 
   float cosInc = clamp(abs(dot(N, L)), 1e-4, 1.0);   
 
-  // Espesor local: cosφ ≈ yLocal (esfera radio 1)
+  // Local thickness: cosφ ≈ yLocal (sphere with radius 1)
   float cosPhi = clamp(vPosObj.y, -1.0, 1.0);
   float d_nm   = thickness_nm_from_cosphi(cosPhi);
   float d_m    = d_nm * 1e-9;
 
-  // Integración espectral (Airy + Fresnel s/p)
+  // Spectral integration (Airy + Fresnel s/p)
   float X=0.0, Y=0.0, Z=0.0, Rsum=0.0;
-  
-
-
-  // INTEGRACIÓN ESPECTRAL:
+ 
   for (int i = 0; i < NS; ++i) {
 
     float wl_nm = wlStart + float(i) * stepNm;
@@ -159,16 +153,13 @@ void main(){
 
     vec4 spec = sampleSpectral(i);
     
-    // PESO ESPECTRAL: dependediendo del modo de luz
+    // SPECTRAL WEIGHT: depending on the light mode
     float weight;
 
-    if (lightMode == 0) { // Luz blanca: peso uniforme según D65
-
-      // luz blanca (D65)
+    if (lightMode == 0) { // White lignt: uniform weight as D65
       weight = spec.a;
 
-    } else { // Luz monocromática: gaussiana centrada en lambda0
-
+    } else { // Monochromatic light: a gaussiand centered in lambda0
       float d = wl_nm - lambda0;
       weight = exp(-(d*d) / (2.0 * spectralWidth * spectralWidth));
 
@@ -182,36 +173,21 @@ void main(){
   }
 
 
-
-
-// --- Normalización fotométrica e irradiancia reflejada (como ya tenías) ---
+// ------- Photometric normalization and reflected irraciance -------
 float scale = kNorm * stepNm;
 vec3 XYZ    = vec3(X, Y, Z) * scale;
 vec3 rgbLin = xyz2rgbLinear(XYZ);
 vec3 rgbRefl = linear2srgb(rgbLin);  // reflexión en sRGB
 
-// --- Reflectancia media local (ya acumulaste Rsum) ---
+// ----------- Average local reflectance -----------
 float Rmean = Rsum / float(NS);
-
-// --- Transmitancia media local ---
-float Tmean = clamp(1.0 - Rmean, 0.0, 1.0);
-
-// --- Ángulo local de vista (incidencia efectiva en pompa) ---
-float cosAng = clamp(abs(dot(N, L)), 1e-4, 1.0);
-
-
-// --- Atenuación angular de la transmisión: A(θ) = mix(floor, 1, (cosθ)^p) ---
-float Aang = mix(transAngleFloor, 1.0, pow(cosAng, transAnglePower));
-
-// --- Mezcla FÍSICA: rgb_out = (Tmean * Aang) * white + reflexión ---
-float T = clamp(1.0 - Rmean, 0.0, 1.0);
 
 vec3 rgb = rgbRefl;
 
-// --- Transparencia: ligada a Tmean * Aang (película transmite mucho) ---
+// ---------- Transparence ----------
 float alphaOut = showTransmission ? clamp(0.15 + 0.85 * Rmean, 0.15, 1.0) : 0.99;
 
-// --- Salida ---
+// ---------- Exit -----------
 gl_FragColor = vec4(clamp(rgb, 0.0, 1.0), alphaOut);
 
 }
