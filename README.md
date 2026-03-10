@@ -129,25 +129,11 @@ pompa-iridiscencia/
 No installation is required.
 
  1. Clone the repository:
-    git clone https://github.com/YOUR_USERNAME/soap-bubble-iridescence.git
+    git clone https://github.com/SantiagoGR11/pompa-iridiscencia.git
  2. Open the project folder.
  3. Launch index.html in a browser.
 
 Because the project runs entirely in the browser, no external dependencies need to be installed.
-
----
-
-## 🔍 **Analysis workflow**
-
-- Data Loading from dataset_laser.csv.
-- Preprocessing: normalization and interpolation.
-- Signal Processing:
-    - FFT to estimate dominant frequencies.
-    - Double band-pass filtering.
-    - Nonlinear Least Squares (NLLS) fitting with a modulated cosine model.
-- Final Analysis:
-    - Linear estimations (ODR) for parameter relationships.
-    - Comparative visualization.
 
 ---
 
