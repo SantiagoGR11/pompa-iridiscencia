@@ -113,9 +113,9 @@ pompa-iridiscencia/
 │  
 ├── docs/   
 │   ├── index.html         
-│   ├── style.css
-│   ├── app.js
-│   ├── shader.js  
+│   ├── style.css      
+│   ├── app.js     
+│   ├── shader.js        
 │  
 ├── README.md  
 └── LICENSE  
