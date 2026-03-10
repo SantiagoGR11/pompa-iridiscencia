@@ -101,7 +101,7 @@ const uniforms = {
   n2: { value: 1.33 },
   n3: { value: 1.0 },
 
-  Ldir: { value: new THREE.Vector3(0,1,0) },
+  Ldir: { value: new THREE.Vector3(0,-1,0) },
 
   transAnglePower: { value: 1.5 },
   transAngleFloor: { value: 0.15 },
@@ -337,7 +337,7 @@ async function downloadCertificatePDF() {
 
       <div style="
         width:400px;
-        aspect-ratio: 400/380;
+        aspect-ratio: 400/350;
         border:10px solid #fff;
         border-radius:8px;
         display:grid;
@@ -364,7 +364,7 @@ Desarrollado por:
       <div style="display:grid;justify-items:center;gap:8px;">
         <div>Más información en:</div>
         <div style="width:96px;height:96px;border:2px solid rgba(255,255,255,.35);border-radius:6px;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.03);">
-          <img src="qrs/complementario.PNG" alt="QR info" style="width:100%;height:100%;object-fit:cover;" />
+          <img src="qrs/repositorio.png" alt="QR info" style="width:100%;height:100%;object-fit:cover;" />
         </div>
       </div>
       <div style="display:grid;justify-items:center;gap:8px;">
