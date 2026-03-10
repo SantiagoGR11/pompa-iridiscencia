@@ -48,6 +48,10 @@ uniform float kNorm;            // 1 / sum(E*ybar)*Δλ
 uniform float transAnglePower;  // p, típico 1.0..3.0   (control angular de T)
 uniform float transAngleFloor;  // A_min, típico 0.05..0.25 (suelo de transmisión)
 uniform vec3 Ldir;          // dirección de luz en espacio de vista
+uniform int lightMode;
+uniform float lambda0;
+uniform float spectralWidth;
+
 
 uniform bool showTransmission;
 
@@ -124,37 +128,60 @@ void main(){
   // Integración espectral (Airy + Fresnel s/p)
   float X=0.0, Y=0.0, Z=0.0, Rsum=0.0;
   
-for (int i = 0; i < NS; ++i) {
-  float wl_nm = wlStart + float(i) * stepNm;  // sigues usando tus uniforms
-  float wl_m  = wl_nm * 1e-9;
 
-  float rs12, rp12, cos2;
-  float n2_disp = n2 + 0.004 * (550.0 - wl_nm) / 170.0;
-  fresnel(n1, n2_disp, cosInc, rs12, rp12, cos2);
 
-  float rs23, rp23, cos3;
-  fresnel(n2_disp, n3, cos2, rs23, rp23, cos3);
+  // INTEGRACIÓN ESPECTRAL:
+  for (int i = 0; i < NS; ++i) {
 
-  float phi = 4.0 * PI * n2_disp * d_m * cos2 / wl_m;
-  float c = cos(phi), s = sin(phi);
+    float wl_nm = wlStart + float(i) * stepNm;
+    float wl_m  = wl_nm * 1e-9;
 
-  float a = rs12, b = rs23;
-  float Rs = ((a+b*c)*(a+b*c) + (b*s)*(b*s)) /
-             ((1.0+a*b*c)*(1.0+a*b*c) + (a*b*s)*(a*b*s));
+    float rs12, rp12, cos2;
+    float n2_disp = n2 + 0.004 * (550.0 - wl_nm) / 170.0;
+    fresnel(n1, n2_disp, cosInc, rs12, rp12, cos2);
 
-  a = rp12; b = rp23;
-  float Rp = ((a+b*c)*(a+b*c) + (b*s)*(b*s)) /
-             ((1.0+a*b*c)*(1.0+a*b*c) + (a*b*s)*(a*b*s));
+    float rs23, rp23, cos3;
+    fresnel(n2_disp, n3, cos2, rs23, rp23, cos3);
 
-  float R = 0.5 * (Rs + Rp);
-  Rsum += R;
+    float phi = 4.0 * PI * n2_disp * d_m * cos2 / wl_m;
+    float c = cos(phi), s = sin(phi);
 
-  vec4 spec = sampleSpectral(i);     // (x̄,ȳ,z̄,E)
-  float I = spec.a * R;
-  X += I * spec.r;
-  Y += I * spec.g;
-  Z += I * spec.b;
-}
+    float a = rs12, b = rs23;
+    float Rs = ((a+b*c)*(a+b*c) + (b*s)*(b*s)) /
+                ((1.0+a*b*c)*(1.0+a*b*c) + (a*b*s)*(a*b*s));
+
+    a = rp12; b = rp23;
+    float Rp = ((a+b*c)*(a+b*c) + (b*s)*(b*s)) /
+                ((1.0+a*b*c)*(1.0+a*b*c) + (a*b*s)*(a*b*s));
+
+    float R = 0.5 * (Rs + Rp);
+    Rsum += R;
+
+    vec4 spec = sampleSpectral(i);
+    
+    // PESO ESPECTRAL: dependediendo del modo de luz
+    float weight;
+
+    if (lightMode == 0) { // Luz blanca: peso uniforme según D65
+
+      // luz blanca (D65)
+      weight = spec.a;
+
+    } else { // Luz monocromática: gaussiana centrada en lambda0
+
+      float d = wl_nm - lambda0;
+      weight = exp(-(d*d) / (2.0 * spectralWidth * spectralWidth));
+
+    }
+
+    float I = weight * R;
+
+    X += I * spec.r;
+    Y += I * spec.g;
+    Z += I * spec.b;
+  }
+
+
 
 
 // --- Normalización fotométrica e irradiancia reflejada (como ya tenías) ---

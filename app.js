@@ -13,6 +13,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x1f2230);
 
 const container = document.getElementById("simContainer");
+const lambdaControl = document.getElementById("lambdaControl");
 
 const camera = new THREE.PerspectiveCamera(60,container.clientWidth / container.clientHeight,0.2,100);
 // === Cámara en coordenadas esféricas (radio fijo) ===
@@ -63,6 +64,22 @@ rollSlider.addEventListener('input', () => {
   setCameraFromSpherical();
 });
 
+function updateLightUI() {
+
+  if (lightType.value === "white") {
+
+    material.uniforms.lightMode.value = 0;
+    lambdaControl.style.display = "none";
+
+  } else {
+
+    material.uniforms.lightMode.value = 1;
+    lambdaControl.style.display = "block";
+
+  }
+
+}
+
 // Colocar cámara al iniciar
 setCameraFromSpherical();
 
@@ -102,6 +119,9 @@ const uniforms = {
   n3: { value: 1.0 },
 
   Ldir: { value: new THREE.Vector3(0,-1,0) },
+  lightMode: { value: 0 },   // 0 = blanca, 1 = monocromática
+  lambda0:   { value: 550.0 }, // nm , longitud de onda central para luz monocromática
+  spectralWidth: { value: 50.0 }, // nm , ancho espectral para luz monocromática (desviación típica de la gaussiana)
 
   transAnglePower: { value: 1.5 },
   transAngleFloor: { value: 0.15 },
@@ -232,6 +252,9 @@ const n2Slider   = document.getElementById("n2Slider");
 const e0Slider   = document.getElementById("e0Slider");
 const eavgSlider = document.getElementById("eavgSlider");
 const transparencyToggle = document.getElementById("transparencyToggle");
+const lightType = document.getElementById("lightType");
+const lambdaSlider = document.getElementById("lambdaSlider");
+const lambdaVal = document.getElementById("lambdaVal");
 
 // Los <span> que muestran el valor
 const n2Val   = document.getElementById("n2Val");
@@ -242,6 +265,7 @@ const eavgVal = document.getElementById("eavgVal");
 n2Val.textContent   = Number(n2Slider.value).toFixed(2);
 e0Val.textContent   = Number(e0Slider.value).toFixed(0);
 eavgVal.textContent = Number(eavgSlider.value).toFixed(0);
+lambdaVal.textContent = Number(lambdaSlider.value).toFixed(0);
 
 // Listeners: actualizan uniform y número visible
 n2Slider.addEventListener("input", () => {
@@ -264,6 +288,19 @@ eavgSlider.addEventListener("input", () => {
 
 transparencyToggle.addEventListener("change", () => {
   material.uniforms.showTransmission.value = transparencyToggle.checked;
+});
+
+lightType.addEventListener("change", () => {
+  material.uniforms.lightMode.value =
+    lightType.value === "mono" ? 1 : 0;
+});
+lightType.addEventListener("change", updateLightUI);
+updateLightUI();
+
+lambdaSlider.addEventListener("input", () => {
+  const v = Number(lambdaSlider.value);
+  material.uniforms.lambda0.value = v;
+  lambdaVal.textContent = v.toFixed(0);
 });
 
 // === Botón "Descargar certificado": abre certificate.html con los valores actuales ===

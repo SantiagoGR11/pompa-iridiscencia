@@ -43,6 +43,17 @@
     <div id="physUI" style="left:8px; top:170px; color:#ccc; font:12px monospace; background:#141821; padding:8px; border-radius:6px;">
       <div><b>Parámetros físicos</b></div>
 
+      <label>Tipo de luz:</label>
+      <select id="lightType">
+        <option value="white">Blanca</option>
+        <option value="mono">Monocromática</option>
+      </select>
+
+      <div id="lambdaControl">
+      <label>λ₀: <span id="lambdaVal">550</span> nm</label><br>
+      <input id="lambdaSlider" type="range" min="380" max="780" step="1" value="550" style="width:220px">
+      </div><br>
+
       <label>Índice de refracción: <span id="n2Val">1.33</span></label><br>
       <input id="n2Slider" type="range" min="1.00" max="2.00" step="0.001" value="1.33" style="width:220px"><br>
 
@@ -52,7 +63,8 @@
       <label>Espesor promedio: <span id="eavgVal">900</span>nm</label><br>
       <input id="eavgSlider" type="range" min="200" max="2000" step="20" value="900" style="width:220px"><br>
 
-      <label>Reflectancia: <input id="transparencyToggle" type="checkbox" style="width:10px" checked> </label>
+      <label>Reflectancia: <input id="transparencyToggle" type="checkbox" style="width:10px" checked> </label><br>
+
     </div>
 
     <div id="simContainer"></div>
