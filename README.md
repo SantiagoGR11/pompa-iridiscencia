@@ -28,47 +28,94 @@ The full scientific poster associated with this project is available here:
 
 ---
 
-[![Python](https://img.shields.io/badge/Python-3.10-blue)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)]()
-[![Status](https://img.shields.io/badge/status-completed-success)]()
-
----
-
 ## 🔍 **Abstract**
 
-This repository contains code and data associated with an experimental study on implementing algebraic operations between waves using linear optical systems. Data from an interferometric setup are processed through FFT-based filtering and nonlinear least squares fitting to parametrize wave number modifications via Fourier-plane manipulation. The workflow demonstrates how wave products can be mapped onto controllable optical signal patterns, providing a foundation for analog optical computation.
+Soap bubbles **exhibit vivid iridescent colours due to interference** in thin liquid films.
+Because the film thickness is typically on the order of hundreds of nanometers, reflections from the two interfaces of the film interfere constructively or destructively depending on wavelength and viewing angle.
+
+This project implements a physically motivated model of this phenomenon using:
+ - Fresnel reflection coefficients for the two film interfaces
+ - Phase delay due to optical path difference in the film
+ - Spectral integration across the visible range
+ - Conversion from CIE XYZ tristimulus values to sRGB
+The resulting colour distribution is computed in real time through a **GPU fragment shader**, allowing interactive exploration of the parameters governing the iridescence.
 
 ---
 
 ## 🎯 **Scientific Objective**
-- Implement basic operations between waves (addition, subtraction, scalar multiplication) using linear media.
-- Analyze how manipulation in the Fourier plane allows modification of the wavenumber.
-- Fit interference patterns using digital signal processing and nonlinear models.
 
-This work lays the foundation for future developments in **Fourier optics** and **scientific data analysis**, specifically seeking to parameterize basic algebraic operations through linear optics.
+ - Model the iridescence of a soap bubble using thin-film interference theory.
+ - Simulate the wavelength-dependent reflectance of the film.
+ - Convert spectral reflectance into perceptual colour through CIE colour matching functions.
+ - Provide an interactive tool to explore how physical parameters affect the observed colours.
+
+---
+
+## ⚙️ **Physical Model**
+
+The interference arises from the optical path difference between the first two reflected rays:
+
+$$
+\Delta = 2 n e \cos \theta_t
+$$
+
+The resulting phase difference is:
+
+$$
+\delta = \frac{2\pi}{\lambda}(2 n e \cos\theta_t) + \pi
+$$
+
+Constructive interference occurs when:
+
+$$
+\delta = 2m\pi
+$$
+
+The reflected intensity depends on the Fresnel reflection coefficients of the interfaces.
+
+The perceived colour is obtained through spectral integration:
+
+$$
+I = \int_{\lambda_{vis}} R(\lambda),E(\lambda),d\lambda
+$$
+
+where:
+
+(R($$\lambda$$)) is the spectral reflectance of the film
+
+(E($$\lambda$$)) is the spectral power distribution of the illumination.
+
+---
+
+## 🧠 **Rendering Approach**
+
+The simulation is implemented using **WebGL shaders**.
+
+Key elements of the rendering pipeline:
+ 1. Compute local film thickness across the bubble surface.
+ 2. Evaluate Fresnel reflection coefficients for each wavelength.
+ 3. Calculate interference phase shift.
+ 4. Integrate reflectance across the visible spectrum.
+ 5. Convert the resulting XYZ colour to sRGB.
+
+This computation is executed **per-pixel in the fragment shader**, enabling real-time visualisation.
 
 ---
 
 ## 📂 **Project Structure**
-laser-calculator/  
+
+pompa-iridiscencia/  
+│   
 │  
-├── data/  
-│   └── dataset_laser.csv             # Experimental data    
-│  
-├── docs/   
+├── visuals/   
 │   └── POSTER_Laser-Calculator       # Proyect presentation  
 │   └── poster_preview                # Proyect prewiew  
-│   └── Graph2_MeasuredPatterns       # Graph 2 of the poster  
-│   └── Graph3_WavenumberSpectrum     # Graph 3 of the poster   
-│   └── Graph4_FittedFilteredSignals  # Graph 4 of the poster   
-│   └── Graph5_PatternTrends          # Graph 5 of the poster    
 │  
-├── src/   
-│   ├── preprocessing.py              # Normalization and interpolation  
-│   ├── signal_processing.py          # FFT, band-pass filtering, NLLS fitting  
-│   ├── parameter_analysis.py         # Linear estimations and final results  
-│   ├── visualization.py              # Plotting utilities  
-│   └── main.py                       # Main script  
+├── docs/   
+│   ├── index.html         
+│   ├── style.css
+│   ├── app.js
+│   ├── shader.js  
 │  
 ├── README.md  
 └── LICENSE  
@@ -79,21 +126,14 @@ laser-calculator/
 
 ## 🚀 **How to Run**
 
+No installation is required.
 
-*Requirements*
-- Python 3.10 or higher
-- Install dependencies:
-```bash
-# 1. Clone the repository:
-git clone https://github.com/yourusername/laser-calculator.git
-cd laser-calculator
+ 1. Clone the repository:
+    git clone https://github.com/YOUR_USERNAME/soap-bubble-iridescence.git
+ 2. Open the project folder.
+ 3. Launch index.html in a browser.
 
-# 2. Install dependencies:
-pip install -r requirements.txt
-
-# 3. Run the main script:
-python src/main.py
-```
+Because the project runs entirely in the browser, no external dependencies need to be installed.
 
 ---
 
@@ -111,32 +151,44 @@ python src/main.py
 
 ---
 
-## 📊 **Example Outputs**
-
-- Preprocessed interference pattern
-![Interference patterns after preprocessing](docs/Graph2_MeasuredPatterns.png)
-- FFT spectrum highlighting dominant wavenumbers.
-![Wavenumber spectrum of measured patterns](docs/Graph3_WavenumberSpectrum.png)
-- Filtered interference pattern with NLLS fit.
-![Example of filtered and fitted signal](docs/Graph4_FittedFilteredSignals.png)
-- Comparative plots of linear estimations.
-![Dependencies between the parameters of the interference pattern](docs/Graph5_PatternTrends.png)
-
----
-
 ## 🛠 **Technologies**
 
-- Python 3.x
-- NumPy, SciPy, Pandas, Matplotlib
+ - JavaScript (ES6)
+ - WebGL
+ - Three.js
+ - GLSL shaders
+ - html2canvas
+ - jsPDF
 
 ---
 
-## 📌 **Next Steps**
+## 📊 **Features**
 
-- Keep working in this experiment in order to establish a complete
-  analytical parameterization of wave product.
-- Study the possibility of parameterizing more complex algebraic operations 
-- Explore other applications of Fourier optics in advanced signal processing.
+ - Real-time thin-film interference simulation
+ - Physically-motivated reflectance model
+ - Spectral integration across the visible range
+ - Interactive control of physical parameters
+ - Export of simulation results as a certificate
+
+---
+
+## 📌 **Possible Extensions**
+
+- Introduce time-dependent **gravitational drainage** of the film thickness.
+ - Implement **multiple internal reflections** beyond the first two beams.
+ - Include background illumination to reproduce real viewing conditions.
+
+---
+
+## 👨‍🔬 **Authors**
+
+Developed by:
+ - Mario Dávila Muñoz
+ - Ángela Fanjul Álvarez
+ - Santiago García Rodríguez
+ -Samuel García Tuñón
+
+Physics Degree - University of Oviedo
 
 ---
 
